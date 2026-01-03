@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Course List App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            width: 300px;
+        }
+
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            cursor: move;
+        }
+
+        li.dragging {
+            opacity: 0.5;
+        }
+
+        h3 {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Course List (Drag & Drop)</h2>
+
+<ul id="courseList">
+    <li draggable="true">Data Structures</li>
+    <li draggable="true">Operating Systems</li>
+    <li draggable="true">Computer Networks</li>
+    <li draggable="true">Database Management</li>
+    <li draggable="true">Artificial Intelligence</li>
+</ul>
+
+<h3>Updated Order:</h3>
+<ol id="updatedOrder"></ol>
+
+<script>
+    const list = document.getElementById("courseList");
+    const updatedOrder = document.getElementById("updatedOrder");
+    let draggedItem = null;
+
+    list.addEventListener("dragstart", (e) => {
+        draggedItem = e.target;
+        e.target.classList.add("dragging");
+    });
+
+    list.addEventListener("dragend", (e) => {
+        e.target.classList.remove("dragging");
+        updateOrder();
+    });
+
+    list.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+            list.appendChild(draggedItem);
+        } else {
+            list.insertBefore(draggedItem, afterElement);
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const elements = [...container.querySelectorAll("li:not(.dragging)")];
+
+        return elements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function updateOrder() {
+        updatedOrder.innerHTML = "";
+        document.querySelectorAll("#courseList li").forEach(course => {
+            const li = document.createElement("li");
+            li.textContent = course.textContent;
+            updatedOrder.appendChild(li);
+        });
+    }
+
+    updateOrder();
+</script>
+
+</body>
+</html>
